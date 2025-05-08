@@ -65,76 +65,81 @@
           </div>
         </div>
   <script>             
-          function displayRequests() {
-            
-            var requests = JSON.parse(localStorage.getItem("bookRequests")) || [];
-      
-            var table = document.createElement("table");
-            var headerRow = table.insertRow();
-            headerRow.innerHTML = "<th>Name</th><th>Book id</th><th>Book Title</th><th>Author</th><th>Genre</th><th>Issue Date</th><th>Expiry Date</th><th>Status</th><th>Action</th>";
-            requests.forEach(function(request, index) {
-              var row = table.insertRow();
-               row.innerHTML = "<td>" + request.name + "</td><td>"  + request.bookId + "</td><td>" + request.bookTitle + "</td><td>" + request.author + "</td><td>" + request.genre + "</td><td>" + request.issueDate + "</td><td>" + request.expiryDate + "</td><td>" + request.status + "</td><td><button onclick='approveRequest(" + index + ")' id='approve'>Approve</button> <button onclick='rejectRequest(" + index + ")'>Reject</button> <button onclick='removeRequest(" + index + ")'>Remove</button></td>";
-            });
-      
-            document.getElementById("requestsTable").innerHTML = "";
-            document.getElementById("requestsTable").appendChild(table);
-          }
-          
-          function approveRequest(index) {
-          // Retrieve the book requests from local storage
-          var requests = JSON.parse(localStorage.getItem("bookRequests")) || [];
-      
-          // Update the status of the selected request to "Approved"
-          requests[index].status = "Approved";
-      
-          // Update the book requests data in local storage
-          localStorage.setItem("bookRequests", JSON.stringify(requests));
-      
-          // Retrieve the books from local storage
-          var storedBooks = JSON.parse(localStorage.getItem("booksAvailable")) || [];
-      
-          // Find the book corresponding to the approved request
-          var bookId = requests[index].bookId;
-          var foundBook = storedBooks.find(book => book.id === bookId);
-      
-          // Check if the book with the specified ID was found
-          if (foundBook) {
-            // Update the book information
-      
-            foundBook.rent++;
-            foundBook.available = foundBook.quantity - foundBook.rent;
+  function displayRequests() {
+  var requests = JSON.parse(localStorage.getItem("bookRequests")) || [];
+  var table = document.createElement("table");
 
-          
-            // Update the books data in local storage
-            localStorage.setItem("booksAvailable", JSON.stringify(storedBooks));
-            document.getElementById('approve').disabled = true;
-            alert("Book Approved")
+  var headerRow = table.insertRow();
+  headerRow.innerHTML = "<th>Name</th><th>Book id</th><th>Book Title</th><th>Author</th><th>Genre</th><th>Issue Date</th><th>Expiry Date</th><th>Status</th><th>Action</th>";
 
-            displayRequests();
+  requests.forEach(function(request, index) {
+    // Skip rows marked as hidden
+    if (request.hidden) return;
+
+    var row = table.insertRow();
+    var actions = "";
+
+    if (request.status === "Pending" || request.status === "" || !request.status) {
+      actions += "<button onclick='approveRequest(" + index + ")'>Approve</button> ";
+      actions += "<button onclick='rejectRequest(" + index + ")'>Reject</button> ";
+    }
+
+    actions += "<button onclick='removeRequest(" + index + ")'>Remove</button>";
+
+    row.innerHTML = "<td>" + request.name + "</td><td>" + request.bookId + "</td><td>" + request.bookTitle + "</td><td>" + request.author + "</td><td>" + request.genre + "</td><td>" + request.issueDate + "</td><td>" + request.expiryDate + "</td><td>" + request.status + "</td><td>" + actions + "</td>";
+  });
+
+  document.getElementById("requestsTable").innerHTML = "";
+  document.getElementById("requestsTable").appendChild(table);
+}
+          
+function approveRequest(index) {
+  var requests = JSON.parse(localStorage.getItem("bookRequests")) || [];
+
+  requests[index].status = "Approved";
+  localStorage.setItem("bookRequests", JSON.stringify(requests));
+
+  var storedBooks = JSON.parse(localStorage.getItem("booksAvailable")) || [];
+  var bookId = requests[index].bookId;
+  var foundBook = storedBooks.find(book => book.id === bookId);
+
+  if (foundBook) {
+    foundBook.rent++;
+    foundBook.available = foundBook.quantity - foundBook.rent;
+
+    localStorage.setItem("booksAvailable", JSON.stringify(storedBooks));
+    alert("Book Approved");
+  }
+
+  // Call after everything is saved
+  displayRequests();
+}
+
+function rejectRequest(index) {
+  var requests = JSON.parse(localStorage.getItem("bookRequests")) || [];
+
+  requests[index].status = "Rejected";
+  localStorage.setItem("bookRequests", JSON.stringify(requests));
+
+  // Call after everything is saved
+  displayRequests();
+}
+
       
-        }
+function removeRequest(index) {
+  var requests = JSON.parse(localStorage.getItem("bookRequests")) || [];
+
+  // Mark as hidden instead of deleting
+  requests[index].hidden = true;
+
+  localStorage.setItem("bookRequests", JSON.stringify(requests));
+  displayRequests();
+}
+</script>
       
-      }
-      
-          function rejectRequest(index) {
-            var requests = JSON.parse(localStorage.getItem("bookRequests")) || [];
-            requests[index].status = "Rejected";
-            localStorage.setItem("bookRequests", JSON.stringify(requests));
-            displayRequests();
-          }
-      
-          function removeRequest(index) {
-            var requests = JSON.parse(localStorage.getItem("bookRequests")) || [];
-            requests.splice(index, 1);
-            localStorage.setItem("bookRequests", JSON.stringify(requests));
-            displayRequests();
-          }
-        </script>
-      
-        <script>
-          displayRequests();
-        </script>
+<script>
+displayRequests();
+</script>
 </body>
 </center>
 </html>
