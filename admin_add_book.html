@@ -252,61 +252,83 @@ function displayTable() {
         }
         
         function editBook(index) {
-  var storedBooks = JSON.parse(localStorage.getItem("books")) || [];
-  var book = storedBooks[index];
+          var storedBooks = JSON.parse(localStorage.getItem("books")) || [];
+          var book = storedBooks[index];
+          if (!book) return;
 
-  if (book) {
-    var formContainer = document.getElementById("edit-pop-up");
-    formContainer.style.display = "inline-block"
+          var formContainer = document.getElementById("edit-pop-up");
+          formContainer.innerHTML = ""; // Clear any existing form
+          formContainer.style.display = "inline-block";
 
-    var form = document.createElement("form");
+          var form = document.createElement("form");
 
-    // Create input fields for each property
-    for (var prop in book) {
-      if (prop !== "id") {
-        var label = document.createElement("label");
-        label.textContent = prop.charAt(0).toUpperCase() + prop.slice(1) + ": ";
-        var input = document.createElement("input");
-        input.type = "text";
-        input.value = book[prop];
-        input.name = prop;
-        form.appendChild(label);
-        form.appendChild(input);
-        form.appendChild(document.createElement("br"));
+          // Keep original quantity for calculating borrowed count
+          var originalQuantity = parseInt(book.quantity);
+
+          // Create inputs for all editable properties except ID
+          for (var prop in book) {
+            if (prop !== "id") {
+              var label = document.createElement("label");
+              label.textContent = prop.charAt(0).toUpperCase() + prop.slice(1) + ":";
+              
+              var input = document.createElement("input");
+              input.type = (prop === "quantity") ? "number" : "text";
+              input.value = book[prop];
+              input.name = prop;
+
+              form.appendChild(label);
+              form.appendChild(input);
+              form.appendChild(document.createElement("br"));
+            }
+          }
+
+          // Save button
+          var submitBtn = document.createElement("button");
+          submitBtn.type = "button";
+          submitBtn.textContent = "Save";
+
+          submitBtn.addEventListener("click", function () {
+            for (var prop in book) {
+              if (prop !== "id" && form.elements[prop]) {
+                book[prop] = form.elements[prop].value;
       }
     }
 
-    // Create submit button
-    var submitBtn = document.createElement("button");
-    submitBtn.type = "button";
-    submitBtn.textContent = "Save";
-    submitBtn.addEventListener("click", function() {
-      // Update the book object with the edited values
+    // Update localStorage for books
+    localStorage.setItem("books", JSON.stringify(storedBooks));
+
+    //update booksAvailable
+    var availableBooks = JSON.parse(localStorage.getItem("booksAvailable")) || [];
+    var availableBook = availableBooks.find(b => b.id == book.id);
+    if (availableBook) {
+    
+      var newQuantity = parseInt(book.quantity);
+      var borrowed = parseInt(availableBook.quantity) - parseInt(availableBook.available);
+      
+      // Update properties
       for (var prop in book) {
         if (prop !== "id") {
-          book[prop] = form.elements[prop].value;
+          availableBook[prop] = book[prop];
         }
       }
 
-      // Update the storedBooks array in local storage
-      localStorage.setItem("books", JSON.stringify(storedBooks));
-      localStorage.setItem("booksAvailable", JSON.stringify(storedBooks));
+      //available books
+      availableBook.available = newQuantity - borrowed;
+      availableBook.quantity = newQuantity;
 
-      // Close the form
-      formContainer.removeChild(form);
+      localStorage.setItem("booksAvailable", JSON.stringify(availableBooks));
+    }
 
-      // Display success message or perform any other necessary actions
-      alert("Book updated!");
+    alert("Book updated!");
+    formContainer.style.display = "none";
+    formContainer.innerHTML = "";
+    displayTable();
+  });
 
-      // Call a function to update the displayed table
-      displayTable();
-    });
-
-    // Append the form to the formContainer div
-    formContainer.appendChild(form);
-    form.appendChild(submitBtn);
-  }
+  form.appendChild(submitBtn);
+  formContainer.appendChild(form);
 }
+
            
         function removeBook(index) {
             var remove = JSON.parse(localStorage.getItem("books")) || [];
