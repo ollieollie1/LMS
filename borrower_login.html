@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Borrower Login</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+  <link rel="stylesheet" href="borrower_library.css"/>
+  <link rel="shortcut icon" type="image/png" href="img/favicon.png">
+</head>
+
+<body>
+  <div class="login-middle"> 
+    <img src="library-background.jpg" width="100%"/>   
+  </div>  
+
+  <div class="login-section">
+    <div class="login-container">
+      <img src="library(2).jpg"/>
+      <div class="login-form">
+        <h2>Borrower Login</h2>
+        <form>
+          <input type="text" id="loginInput" placeholder="Username or Email" required><br>
+          <input type="password" id="password" placeholder="Password" required><br>
+
+          <button type="button" class="btn-submit" onclick="login()">Login</button>
+        </form>
+        <p>Don't have an account? <a href="borrower_register.html">Register</a></p><br>
+        <p style="font-size: 12px;">Return to <a href="index.html" style="font-size: 12px;">Lobby</a></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function login() {
+      var loginInput = document.getElementById("loginInput").value.trim();
+      var password = document.getElementById("password").value;
+
+      if (!loginInput || !password) {
+        alert("Please fill in all fields.");
+        return;
+      }
+
+      var users = JSON.parse(localStorage.getItem("users")) || [];
+
+      // Find user by username or email
+      var user = users.find(u =>
+        (u.username === loginInput || u.email === loginInput) &&
+        u.password === password
+      );
+
+      if (user) {
+        localStorage.setItem("loggedInUser", JSON.stringify(user));
+        alert("Welcome, " + user.name + "!");
+        window.location.href = "borrower_homepage.html";
+      } else {
+        alert("Invalid username/email or password.");
+        document.getElementById("loginInput").value = "";
+        document.getElementById("password").value = "";
+      }
+    }
+  </script>
+</body>
+</html>

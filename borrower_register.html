@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register Borrower</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+  <link rel="stylesheet" href="borrower_library.css"/>
+  <link rel="shortcut icon" type="image/png" href="img/favicon.png">
+</head>
+
+<body>
+  <div class="login-middle"> 
+    <img src="library-background.jpg" width="100%"/>   
+  </div>  
+
+  <div class="login-section">
+    <div class="login-container">
+      <img src="library(2).jpg"/>
+      <div class="login-form">
+        <h2 style="margin-bottom: 25px;">Borrower Register</h2>
+        <form>
+          <input type="text" id="name" placeholder="Full Name" required><br>
+          <input type="text" id="username" placeholder="Username" required><br>
+          <input type="text" id="contact" placeholder="Contact Number" required><br>
+          <input type="email" id="email" placeholder="Email Address" required><br>
+          <input type="password" id="password" placeholder="Password" required><br>
+          <input type="password" id="confirmPassword" placeholder="Confirm Password" required><br>
+
+          <button type="button" id="submit" class="btn-submit" onclick="registerUser()">Register</button>
+        </form>
+        <p>Already have an account? <a href="borrower_login.html">Login</a></p><br>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function registerUser() {
+      var name = document.getElementById("name").value.trim();
+      var username = document.getElementById("username").value.trim();
+      var contact = document.getElementById("contact").value.trim();
+      var email = document.getElementById("email").value.trim();
+      var password = document.getElementById("password").value;
+      var confirmPassword = document.getElementById("confirmPassword").value;
+
+      if (!name || !username || !contact || !email || !password || !confirmPassword) {
+        alert("All fields are required!");
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        alert("Passwords do not match!");
+        return;
+      }
+
+      // Create user object
+      var user = {
+        name: name,
+        username: username,
+        contact: contact,
+        email: email,
+        password: password
+      };
+
+      // Retrieve existing users or empty array
+      var existingUsers = JSON.parse(localStorage.getItem("users")) || [];
+
+      // Optional: prevent duplicate usernames or emails
+      var duplicate = existingUsers.find(u => u.username === username || u.email === email);
+      if (duplicate) {
+        alert("Username or email already taken.");
+        return;
+      }
+
+      existingUsers.push(user);
+      localStorage.setItem("users", JSON.stringify(existingUsers));
+
+      alert("Registration successful!");
+      window.location.href = "borrower_login.html";
+    }
+  </script>
+</body>
+</html>
